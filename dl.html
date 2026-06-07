@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>备用下载 - Nukkit</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #e8e8e8; color: #222; padding: 20px; }
+        .card { background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        pre { background: #f0f0f0; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+        .date { color: #666; font-size: 12px; margin-top: 16px; }
+        a { color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Nukkit 备用下载站</h1>
+        <p>备用站点，主站地址：<a href="http://nkdl.cc.cd">http://nkdl.cc.cd</a></p>
+        <p>如果主站无法访问，请稍后再试。</p>
+    </div>
+
+    <div class="card">
+        <h2>当前版本信息</h2>
+        <div id="jsonContent">加载中...</div>
+        <div class="date" id="dateInfo"></div>
+    </div>
+
+    <div class="card">
+        <h2>说明</h2>
+        <p>本页面数据从 GitHub 仓库实时获取。</p>
+        <p>如需下载 Nukkit 核心文件，请访问主站下载中心。</p>
+        <p>最后更新：2026年6月7日</p>
+    </div>
+
+    <script>
+        fetch('https://raw.githubusercontent.com/wakcvjb/nukkit-mirror/main/nukkit_update.json')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('jsonContent').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                const now = new Date();
+                document.getElementById('dateInfo').innerHTML = '页面生成时间：' + now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日 ' + now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+            })
+            .catch(() => {
+                document.getElementById('jsonContent').innerHTML = '<p>无法加载版本信息，请访问主站查看。</p>';
+            });
+    </script>
+</body>
+</html>
