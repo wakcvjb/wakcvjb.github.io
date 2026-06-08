@@ -1,49 +1,179 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>备用下载 - Nukkit</title>
+    <title>Nukkit Update Mirror - 备用站</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #e8e8e8; color: #222; padding: 20px; }
-        .card { background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
-        pre { background: #f0f0f0; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
-        .date { color: #666; font-size: 12px; margin-top: 16px; }
-        a { color: #2e7d32; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #e8e8e8; color: #222; transition: background 0.2s, color 0.2s; }
+        body.dark { background: #1a1a1a; color: #e0e0e0; }
+        body.dark .card { background: #2d2d2d; border-color: #444; }
+        body.dark .btn { background: #444; color: #fff; }
+        body.dark pre { background: #1a1a1a; color: #0f0; }
+        body.dark .info-row { border-bottom-color: #444; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 24px; }
+        .card { background: #fff; border: 1px solid #ccc; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        h1 { font-size: 28px; margin-bottom: 8px; }
+        .sub { color: #666; margin-bottom: 24px; font-size: 14px; }
+        .btn { display: inline-block; background: #333; color: #eee; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-size: 14px; margin-right: 8px; margin-top: 8px; }
+        .btn-light { background: #e0e0e0; color: #333; }
+        pre { background: #f0f0f0; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 12px; margin: 16px 0; }
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; flex-wrap: wrap; }
+        .info-label { font-weight: bold; }
+        .footer { text-align: center; font-size: 12px; color: #888; margin-top: 32px; padding-top: 16px; border-top: 1px solid #ddd; }
+        body.dark .footer { border-top-color: #444; }
+        .copy-btn { background: #2e7d32; color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-left: 12px; }
+        .theme-btn { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 20px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 100; }
+        .release-item { padding: 12px 0; border-bottom: 1px solid #eee; }
+        body.dark .release-item { border-bottom-color: #444; }
+        .release-version { font-weight: bold; color: #2e7d32; }
+        body.dark .release-version { color: #4caf50; }
+        .release-date { font-size: 12px; color: #888; margin-left: 12px; }
+        .stats-grid { display: flex; gap: 16px; flex-wrap: wrap; margin: 16px 0; }
+        .stat-card { flex: 1; min-width: 100px; background: #f5f5f5; border-radius: 8px; padding: 12px; text-align: center; }
+        body.dark .stat-card { background: #3d3d3d; }
+        .stat-number { font-size: 24px; font-weight: bold; color: #2e7d32; }
+        @media (max-width: 600px) { .container { padding: 20px 16px; } .info-row { flex-direction: column; gap: 4px; } }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Nukkit 备用下载站</h1>
-        <p>备用站点，主站地址：<a href="http://nkdl.cc.cd">http://nkdl.cc.cd</a></p>
-        <p>如果主站无法访问，请稍后再试。</p>
+    <div class="container">
+        <div class="card">
+            <h1>Nukkit Update Mirror</h1>
+            <div class="sub">备用站 · GitHub Pages 托管 · 主站故障时使用</div>
+            <div>
+                <a class="btn" href="http://nkdl.cc.cd">访问主站</a>
+                <a class="btn btn-light" href="https://github.com/wakcvjb/nukkit-mirror" target="_blank">GitHub 仓库</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>最新版本</h2>
+            <div id="versionContent">加载中...</div>
+        </div>
+
+        <div class="card">
+            <h2>项目统计</h2>
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card"><div class="stat-number" id="starCount">-</div><div>Stars</div></div>
+                <div class="stat-card"><div class="stat-number" id="forkCount">-</div><div>Forks</div></div>
+                <div class="stat-card"><div class="stat-number" id="downloadCount">-</div><div>下载量</div></div>
+                <div class="stat-card"><div class="stat-number" id="visitCount">-</div><div>访问量</div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>更新日志</h2>
+            <div id="releasesList">加载中...</div>
+        </div>
+
+        <div class="card">
+            <h2>下载命令</h2>
+            <pre id="downloadCmd">加载中...</pre>
+            <button class="copy-btn" onclick="copyCmd()">复制命令</button>
+        </div>
+
+        <div class="card">
+            <h2>相关链接</h2>
+            <div class="info-row"><span class="info-label">PowerNukkitX</span><span><a href="https://github.com/PowerNukkitX/PowerNukkitX" target="_blank">GitHub 仓库</a></span></div>
+            <div class="info-row"><span class="info-label">API 文档</span><span><a href="http://nkdl.cc.cd/a.html" target="_blank">主站 API 文档</a></span></div>
+            <div class="info-row"><span class="info-label">AI 助手</span><span><a href="http://nkdl.cc.cd/ai.html" target="_blank">主站 AI 助手</a></span></div>
+            <div class="info-row"><span class="info-label">社区</span><span><a href="http://nkdl.cc.cd/community.html" target="_blank">主站社区</a></span></div>
+        </div>
+
+        <div class="footer">
+            数据每 5 分钟同步一次 | 主站恢复后建议使用主站
+        </div>
     </div>
 
-    <div class="card">
-        <h2>当前版本信息</h2>
-        <div id="jsonContent">加载中...</div>
-        <div class="date" id="dateInfo"></div>
-    </div>
-
-    <div class="card">
-        <h2>说明</h2>
-        <p>本页面数据从 GitHub 仓库实时获取。</p>
-        <p>如需下载 Nukkit 核心文件，请访问主站下载中心。</p>
-        <p>最后更新：2026年6月7日</p>
-    </div>
+    <button class="theme-btn" onclick="toggleTheme()">🌙</button>
 
     <script>
-        fetch('https://raw.githubusercontent.com/wakcvjb/nukkit-mirror/main/nukkit_update.json')
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('jsonContent').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
-                const now = new Date();
-                document.getElementById('dateInfo').innerHTML = '页面生成时间：' + now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日 ' + now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-            })
-            .catch(() => {
-                document.getElementById('jsonContent').innerHTML = '<p>无法加载版本信息，请访问主站查看。</p>';
-            });
+        let latestData = null;
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+            document.querySelector('.theme-btn').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+        }
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            document.querySelector('.theme-btn').textContent = '☀️';
+        }
+
+        function formatDate(timestamp) {
+            const d = new Date(timestamp * 1000);
+            return d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0');
+        }
+
+        async function fetchVersion() {
+            try {
+                const res = await fetch('https://raw.githubusercontent.com/wakcvjb/nukkit-mirror/main/nukkit_update.json');
+                const data = await res.json();
+                latestData = data.latest;
+                document.getElementById('versionContent').innerHTML = `
+                    <div class="info-row"><span class="info-label">版本号</span><span><strong>${latestData.version}</strong></span></div>
+                    <div class="info-row"><span class="info-label">Minecraft 版本</span><span>${latestData.mc_version}</span></div>
+                    <div class="info-row"><span class="info-label">构建时间</span><span>${formatDate(latestData.build)}</span></div>
+                    <div class="info-row"><span class="info-label">下载链接</span><span><a href="${latestData.download_url}" target="_blank">GitHub 下载</a></span></div>
+                `;
+                document.getElementById('downloadCmd').innerHTML = `wget ${latestData.download_url}`;
+            } catch(e) {
+                document.getElementById('versionContent').innerHTML = '<p>暂时无法获取版本信息</p>';
+            }
+        }
+
+        async function fetchRepoStats() {
+            try {
+                const res = await fetch('https://api.github.com/repos/wakcvjb/nukkit-mirror');
+                const data = await res.json();
+                document.getElementById('starCount').innerHTML = data.stargazers_count || 0;
+                document.getElementById('forkCount').innerHTML = data.forks_count || 0;
+            } catch(e) {}
+        }
+
+        async function fetchReleases() {
+            try {
+                const res = await fetch('https://api.github.com/repos/wakcvjb/nukkit-mirror/releases');
+                const releases = await res.json();
+                if (Array.isArray(releases) && releases.length > 0) {
+                    let html = '';
+                    releases.slice(0, 5).forEach(r => {
+                        const date = new Date(r.published_at).toLocaleDateString();
+                        html += `<div class="release-item"><span class="release-version">${r.tag_name}</span><span class="release-date">${date}</span><div style="font-size:13px;color:#666;margin-top:4px;">${r.name || '更新'}</div></div>`;
+                    });
+                    document.getElementById('releasesList').innerHTML = html || '<p>暂无更新记录</p>';
+                } else {
+                    document.getElementById('releasesList').innerHTML = '<p>暂无更新记录</p>';
+                }
+            } catch(e) {
+                document.getElementById('releasesList').innerHTML = '<p>无法加载更新日志</p>';
+            }
+        }
+
+        function getVisitCount() {
+            let count = localStorage.getItem('page_views');
+            if (count) {
+                count = parseInt(count) + 1;
+            } else {
+                count = 1;
+            }
+            localStorage.setItem('page_views', count);
+            document.getElementById('visitCount').innerHTML = count;
+        }
+
+        function copyCmd() {
+            const text = document.getElementById('downloadCmd').innerText;
+            navigator.clipboard.writeText(text);
+            alert('已复制下载命令');
+        }
+
+        fetchVersion();
+        fetchRepoStats();
+        fetchReleases();
+        getVisitCount();
     </script>
 </body>
 </html>
