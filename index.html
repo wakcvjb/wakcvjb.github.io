@@ -25,6 +25,13 @@
             box-sizing: border-box;
         }
 
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+
         h1 {
             font-size: 48px;
             font-weight: 700;
@@ -159,6 +166,10 @@
         }
 
         @media (max-width: 480px) {
+            .logo {
+                width: 64px;
+                height: 64px;
+            }
             h1 { font-size: 36px; }
             .subtitle { font-size: 18px; }
         }
@@ -167,6 +178,7 @@
 <body>
 
     <div class="container">
+        <img src="aaa.png" alt="Logo" class="logo">
         <h1>MiniDialogue</h1>
         <div class="subtitle">轻量手机端 AI</div>
         <div class="desc">
