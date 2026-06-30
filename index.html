@@ -235,12 +235,12 @@
             align-items: center;
             justify-content: space-between;
             padding: 12px 16px;
-            background: #e9ecef;
+            background: #f8f9fa;
             border-radius: 8px;
-            border: 1px solid #d0d0d0;
-            opacity: 0.5;
-            pointer-events: none;
-            cursor: not-allowed;
+            border: 1px solid #e9ecef;
+            opacity: 1;
+            pointer-events: auto;
+            cursor: pointer;
         }
 
         .modal .donate-method .method-item .method-info {
@@ -254,6 +254,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #1a1a1a;
         }
 
         .modal .donate-method .method-item .method-info .method-name {
@@ -272,9 +273,15 @@
             font-weight: 500;
             font-size: 14px;
             padding: 6px 12px;
-            background: #d0d0d0;
+            background: #1a1a1a;
+            color: #ffffff;
             border-radius: 6px;
-            pointer-events: none;
+            pointer-events: auto;
+            transition: background 0.2s ease;
+        }
+
+        .modal .donate-method .method-item .method-action:hover {
+            background: #333;
         }
 
         .modal-actions {
@@ -403,37 +410,17 @@
     <div class="overlay" id="donateOverlay">
         <div class="modal">
             <h2>赞助支持</h2>
-            <p>赞助通道维护中，暂不可用。</p>
+            <p>感谢您对 MiniDialogue 项目的支持！您的每一份支持都是项目持续维护的动力。</p>
             <div class="donate-method">
                 <div class="method-item">
                     <div class="method-info">
-                        <span class="material-symbols-outlined">block</span>
+                        <span class="material-symbols-outlined">volunteer_activism</span>
                         <div>
                             <div class="method-name">爱发电</div>
-                            <div class="method-desc">国内赞助平台，暂不可用</div>
+                            <div class="method-desc">通过爱发电平台支持项目</div>
                         </div>
                     </div>
-                    <span class="method-action">暂时关闭</span>
-                </div>
-                <div class="method-item">
-                    <div class="method-info">
-                        <span class="material-symbols-outlined">block</span>
-                        <div>
-                            <div class="method-name">GitHub Sponsors</div>
-                            <div class="method-desc">国外赞助平台，暂不可用</div>
-                        </div>
-                    </div>
-                    <span class="method-action">暂时关闭</span>
-                </div>
-                <div class="method-item">
-                    <div class="method-info">
-                        <span class="material-symbols-outlined">block</span>
-                        <div>
-                            <div class="method-name">Buy Me a Coffee</div>
-                            <div class="method-desc">国外赞助平台，暂不可用</div>
-                        </div>
-                    </div>
-                    <span class="method-action">暂时关闭</span>
+                    <a href="https://afdian.com/a/wakcvjb" target="_blank" class="method-action">去赞助</a>
                 </div>
             </div>
             <div class="modal-actions">
@@ -488,4 +475,4 @@
     </script>
 
 </body>
-</html>
+                        </html>
