@@ -182,8 +182,8 @@
         <h1>MiniDialogue</h1>
         <div class="subtitle">轻量手机端 AI</div>
         <div class="desc">
-            基于 TinyTransformer 架构，仅需 1MB 左右权重即可在手机 CPU 上运行。<br>
-            无需网络，纯本地推理。
+            基于 TinyTransformer 架构，参数量约 8598 万，模型文件 328 MB。<br>
+            需在 GPU 环境下运行，适合本地部署与推理。
         </div>
         
         <a href="#" id="downloadTrigger" class="download-btn">下载模型</a>
@@ -198,8 +198,16 @@
             <h2>使用协议</h2>
             <p>
                 MiniDialogue 遵循 MIT 协议。<br>
-                可自由下载、使用及修改本模型，但需保留版权声明。<br>
-                使用本模型产生的任何后果，开发者不承担法律责任。
+                您可自由下载、使用及修改本模型，但需保留原始版权声明。
+            </p>
+            <p>
+                本模型仅供学习和研究使用，不得用于任何非法、恶意或违反中国法律法规及国际相关准则的用途。开发者不对使用者因使用本模型所引发的任何直接或间接的法律责任负责，使用者需自行承担全部后果与风险。
+            </p>
+            <p>
+                本模型基于公开数据集训练，不包含任何商业机密或受版权保护的内容，但若因使用者自行引入数据而引发的版权纠纷，开发者不负任何责任。
+            </p>
+            <p style="font-size: 14px; color: #888; margin-top: 12px;">
+                下载服务由 <strong>Google 云端硬盘</strong> 提供。
             </p>
             <div class="modal-actions">
                 <button class="btn-decline" id="btnDecline">拒绝</button>
@@ -220,7 +228,7 @@
         });
 
         btnAgree.addEventListener('click', function() {
-            window.location.href = 'https://github.com/wakcvjb/ai';
+            window.location.href = 'https://drive.google.com/file/d/1oIQ03Lr8OXzrwZ1JI_gg5ZhNZ7ZccfgK/view?usp=drive_link';
         });
 
         btnDecline.addEventListener('click', function() {
