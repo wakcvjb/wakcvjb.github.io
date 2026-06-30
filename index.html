@@ -159,11 +159,13 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-        }
-
-        .badge .icon-link a {
+            cursor: pointer;
             color: #1a1a1a;
             text-decoration: underline;
+        }
+
+        .badge .icon-link:hover {
+            color: #333;
         }
 
         .material-symbols-outlined {
@@ -221,6 +223,58 @@
             margin: 0 0 24px 0;
         }
 
+        .modal .donate-method {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 16px 0 24px 0;
+        }
+
+        .modal .donate-method .method-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .modal .donate-method .method-item .method-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal .donate-method .method-item .method-info .method-icon {
+            font-size: 28px;
+        }
+
+        .modal .donate-method .method-item .method-info .method-name {
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .modal .donate-method .method-item .method-info .method-desc {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .modal .donate-method .method-item .method-action {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 6px 12px;
+            background: #e9ecef;
+            border-radius: 6px;
+            transition: background 0.2s ease;
+        }
+
+        .modal .donate-method .method-item .method-action:hover {
+            background: #dee2e6;
+        }
+
         .modal-actions {
             display: flex;
             gap: 12px;
@@ -263,6 +317,11 @@
             .subtitle { font-size: 18px; }
             .roadmap {
                 padding: 12px 16px;
+            }
+            .modal .donate-method .method-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
             }
         }
     </style>
@@ -312,11 +371,11 @@
         <div class="badge">
             <span class="icon-link">
                 <span class="material-symbols-outlined">bug_report</span>
-                <a href="https://github.com/wakcvjb/ai" target="_blank">提交反馈</a>
+                <a href="mailto:rzsmxkojsv@rommiui.com">提交反馈</a>
             </span>
-            <span class="icon-link">
+            <span class="icon-link" id="donateTrigger">
                 <span class="material-symbols-outlined">paid</span>
-                <a href="#" target="_blank">赞助支持</a>
+                赞助支持
             </span>
             <span class="icon-link">
                 <span class="material-symbols-outlined">storage</span>
@@ -348,6 +407,48 @@
         </div>
     </div>
 
+    <div class="overlay" id="donateOverlay">
+        <div class="modal">
+            <h2>赞助支持</h2>
+            <p>您的支持能让 MiniDialogue 项目持续维护和更新。</p>
+            <div class="donate-method">
+                <div class="method-item">
+                    <div class="method-info">
+                        <span class="method-icon">💳</span>
+                        <div>
+                            <div class="method-name">GitHub Sponsors</div>
+                            <div class="method-desc">通过 GitHub 平台进行赞助</div>
+                        </div>
+                    </div>
+                    <a href="https://github.com/sponsors/wakcvjb" target="_blank" class="method-action">去赞助</a>
+                </div>
+                <div class="method-item">
+                    <div class="method-info">
+                        <span class="method-icon">☕</span>
+                        <div>
+                            <div class="method-name">Buy Me a Coffee</div>
+                            <div class="method-desc">请作者喝杯咖啡</div>
+                        </div>
+                    </div>
+                    <a href="https://www.buymeacoffee.com/wakcvjb" target="_blank" class="method-action">去赞助</a>
+                </div>
+                <div class="method-item">
+                    <div class="method-info">
+                        <span class="method-icon">💬</span>
+                        <div>
+                            <div class="method-name">联系作者</div>
+                            <div class="method-desc">直接与作者沟通合作</div>
+                        </div>
+                    </div>
+                    <a href="mailto:rzsmxkojsv@rommiui.com" class="method-action">发送邮件</a>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-decline" id="btnDonateClose">关闭</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const overlay = document.getElementById('overlay');
         const trigger = document.getElementById('downloadTrigger');
@@ -372,7 +473,26 @@
                 overlay.classList.remove('active');
             }
         });
+
+        const donateOverlay = document.getElementById('donateOverlay');
+        const donateTrigger = document.getElementById('donateTrigger');
+        const btnDonateClose = document.getElementById('btnDonateClose');
+
+        donateTrigger.addEventListener('click', function(e) {
+            e.preventDefault();
+            donateOverlay.classList.add('active');
+        });
+
+        btnDonateClose.addEventListener('click', function() {
+            donateOverlay.classList.remove('active');
+        });
+
+        donateOverlay.addEventListener('click', function(e) {
+            if (e.target === donateOverlay) {
+                donateOverlay.classList.remove('active');
+            }
+        });
     </script>
 
 </body>
-</html>
+    </html>
