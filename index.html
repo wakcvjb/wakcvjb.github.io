@@ -50,10 +50,63 @@
             font-size: 16px;
             color: #666;
             line-height: 1.6;
-            margin-bottom: 40px;
+            margin-bottom: 24px;
             max-width: 480px;
             margin-left: auto;
             margin-right: auto;
+        }
+
+        .roadmap {
+            text-align: left;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 32px;
+            border: 1px solid #e9ecef;
+        }
+
+        .roadmap-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+            text-align: center;
+        }
+
+        .roadmap-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .roadmap-item:last-child {
+            border-bottom: none;
+        }
+
+        .roadmap-marker {
+            background: #1a1a1a;
+            color: #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .roadmap-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .roadmap-text strong {
+            color: #1a1a1a;
         }
 
         .download-btn {
@@ -172,6 +225,9 @@
             }
             h1 { font-size: 36px; }
             .subtitle { font-size: 18px; }
+            .roadmap {
+                padding: 12px 16px;
+            }
         }
     </style>
 </head>
@@ -184,6 +240,31 @@
         <div class="desc">
             基于 TinyTransformer 架构，参数量约 8598 万，模型文件 328 MB。<br>
             需在 GPU 环境下运行，适合本地部署与推理。
+        </div>
+
+        <div class="roadmap">
+            <div class="roadmap-title">最新计划</div>
+            <div class="roadmap-item">
+                <div class="roadmap-marker">1</div>
+                <div class="roadmap-text">
+                    <strong>3.5亿参数模型</strong><br>
+                    在现有架构基础上进一步提升参数量至 3.5 亿，探索更复杂的语言理解与生成能力。
+                </div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-marker">2</div>
+                <div class="roadmap-text">
+                    <strong>图片理解模型</strong><br>
+                    引入多模态视觉编码器，使模型具备图片识别、描述与理解能力，覆盖更多应用场景。
+                </div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-marker">3</div>
+                <div class="roadmap-text">
+                    <strong>深度思考推理</strong><br>
+                    加入思维链机制，让模型在回答前进行多步推理，提升复杂逻辑问题的解决能力。
+                </div>
+            </div>
         </div>
         
         <a href="#" id="downloadTrigger" class="download-btn">下载模型</a>
