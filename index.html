@@ -34,6 +34,7 @@
             height: 80px;
             margin-bottom: 16px;
             display: inline-block;
+            cursor: pointer;
         }
 
         h1 {
@@ -329,7 +330,7 @@
 <body>
 
     <div class="container">
-        <img src="aaa.png" alt="Logo" class="logo">
+        <img src="aaa.png" alt="Logo" class="logo" id="logoTrigger">
         <h1>MiniDialogue</h1>
         <div class="subtitle">轻量手机端 AI</div>
         <div class="desc">
@@ -429,6 +430,28 @@
         </div>
     </div>
 
+    <div class="overlay" id="catOverlay">
+        <div class="modal" style="padding: 32px 28px 40px;">
+            <h2>一只小猫的愿望</h2>
+            <p style="margin-bottom: 16px;">
+                感谢您发现了这个隐藏入口。<br><br>
+                我是 MiniDialogue 的开发者 wakcvjb。<br>
+                这个项目完全由我一个人在空闲时间维护，它不赚钱，但让我学到了很多。<br><br>
+                如果您觉得这个项目对您有帮助，并且愿意支持我继续开发下去，<br>
+                可以考虑赞助我一杯咖啡，或者 5 元钱。<br><br>
+                <strong>5 元，够我买一只小猫。</strong><br><br>
+                下面是我想买的那只小猫的照片。<br>
+                感谢您的阅读，也感谢您为这只小猫带来的温暖。
+            </p>
+            <img src="share_1781678238372.png" alt="小猫的照片" style="width: 100%; max-width: 320px; border-radius: 12px; margin: 8px 0 20px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <p style="font-size: 14px; color: #999; margin-bottom: 20px;">2026 年 6 月</p>
+            <div class="modal-actions">
+                <a href="https://afdian.com/a/wakcvjb" target="_blank" class="btn-agree" style="text-decoration: none; display: inline-block; padding: 12px 0; background: #1a1a1a; color: #fff; border-radius: 8px; font-weight: 600; text-align: center; flex: 1;">赞助 5 元买小猫</a>
+                <button class="btn-close" id="btnCatClose" style="flex: 1;">关闭</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const overlay = document.getElementById('overlay');
         const trigger = document.getElementById('downloadTrigger');
@@ -472,7 +495,30 @@
                 donateOverlay.classList.remove('active');
             }
         });
+
+        let clickCount = 0;
+        const logoTrigger = document.getElementById('logoTrigger');
+        const catOverlay = document.getElementById('catOverlay');
+        const btnCatClose = document.getElementById('btnCatClose');
+
+        logoTrigger.addEventListener('click', function() {
+            clickCount++;
+            if (clickCount >= 7) {
+                catOverlay.classList.add('active');
+                clickCount = 0;
+            }
+        });
+
+        btnCatClose.addEventListener('click', function() {
+            catOverlay.classList.remove('active');
+        });
+
+        catOverlay.addEventListener('click', function(e) {
+            if (e.target === catOverlay) {
+                catOverlay.classList.remove('active');
+            }
+        });
     </script>
 
 </body>
-                        </html>
+                </html>
