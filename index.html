@@ -1,526 +1,955 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MiniDialogue</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
-            background-color: #ffffff;
-            color: #1a1a1a;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MiniDialogue — Lightweight Mobile AI</title>
+<style>
+  :root{
+    --blue-1:#0066ff;
+    --blue-2:#00ccff;
+    --blue-glow: 0 0 20px rgba(0,153,255,.65), 0 0 60px rgba(0,102,255,.35);
+    --panel-bg: rgba(8,12,20,0.55);
+    --panel-border: rgba(0,153,255,0.35);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{
+    width:100%; height:100%;
+    background:#000;
+    color:#eaf3ff;
+    font-family:"Helvetica Neue", "Segoe UI", "Hiragino Sans", "PingFang SC", "Microsoft YaHei", "Noto Sans KR", sans-serif;
+    overflow-x:hidden;
+    overflow-y:auto;
+  }
+  #bg-canvas{
+    position:fixed;
+    top:0; left:0;
+    width:100vw; height:100vh;
+    z-index:0;
+    display:block;
+    background:#000;
+  }
+  .page{
+    position:relative;
+    z-index:2;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    opacity:0;
+    animation:fadeIn 1.5s ease forwards;
+    animation-delay:.2s;
+  }
+  @keyframes fadeIn{ to{ opacity:1; } }
 
-        .container {
-            text-align: center;
-            max-width: 640px;
-            padding: 40px 24px;
-            box-sizing: border-box;
-        }
+  /* ---------- NAV ---------- */
+  .navbar{
+    position:fixed;
+    top:0; left:0; right:0;
+    z-index:10;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: clamp(14px,2vw,26px) clamp(20px,4vw,60px);
+    backdrop-filter: blur(6px);
+    background: linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0));
+  }
+  .brand{
+    font-size: clamp(20px,2.2vw,28px);
+    font-weight:700;
+    letter-spacing:2px;
+    color: rgba(255,255,255,0.85);
+    cursor:pointer;
+    text-shadow: var(--blue-glow);
+    user-select:none;
+    transition: color .25s ease, transform .15s ease;
+  }
+  .brand:hover{ color:#fff; transform:scale(1.05); }
+  .nav-right{
+    display:flex;
+    align-items:center;
+    gap: clamp(14px, 2vw, 34px);
+  }
+  .nav-link{
+    font-size: clamp(13px,1vw,16px);
+    color: rgba(255,255,255,0.55);
+    text-decoration:none;
+    letter-spacing:1px;
+    cursor:pointer;
+    transition: color .25s ease;
+    white-space:nowrap;
+  }
+  .nav-link:hover{ color:#fff; }
+  .lang-switch{
+    border: 1px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.05);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: clamp(12px,0.9vw,14px);
+    cursor:pointer;
+    letter-spacing:1px;
+    transition: all .25s ease;
+    user-select:none;
+  }
+  .lang-switch:hover{
+    color:#fff;
+    border-color: var(--blue-2);
+    box-shadow: 0 0 12px rgba(0,153,255,0.4);
+  }
 
-        .logo {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 16px;
-            display: inline-block;
-            cursor: pointer;
-        }
+  /* ---------- HERO ---------- */
+  .hero{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding: 120px 20px 60px;
+    min-height:100vh;
+  }
+  .hero h1{
+    font-size: clamp(42px, 8vw, 96px);
+    font-weight:800;
+    letter-spacing: 3px;
+    color:#fff;
+    text-shadow:
+      0 0 10px rgba(0,204,255,0.8),
+      0 0 30px rgba(0,153,255,0.6),
+      0 0 70px rgba(0,102,255,0.4);
+    margin-bottom: clamp(10px,1.5vw,18px);
+  }
+  .hero .subtitle{
+    font-size: clamp(16px, 2vw, 24px);
+    color: rgba(200,225,255,0.9);
+    letter-spacing:1px;
+    margin-bottom: clamp(10px,1.2vw,16px);
+    font-weight:300;
+  }
+  .hero .description{
+    font-size: clamp(13px, 1.1vw, 16px);
+    color: rgba(170,195,220,0.75);
+    max-width: 720px;
+    line-height:1.8;
+    margin-bottom: clamp(28px,3vw,44px);
+    letter-spacing:0.3px;
+  }
+  .btn-download{
+    position:relative;
+    padding: 16px 46px;
+    font-size: clamp(14px,1.1vw,17px);
+    font-weight:600;
+    letter-spacing:1.5px;
+    color:#fff;
+    background: linear-gradient(135deg, var(--blue-1), var(--blue-2));
+    border:none;
+    border-radius: 40px;
+    cursor:pointer;
+    box-shadow: 0 0 20px rgba(0,153,255,0.45);
+    transition: transform .15s ease, box-shadow .3s ease;
+  }
+  .btn-download:hover{
+    box-shadow: 0 0 40px rgba(0,204,255,0.85), 0 0 80px rgba(0,102,255,0.5);
+    transform: translateY(-2px);
+  }
+  .btn-download:active{
+    transform: scale(0.94);
+  }
 
-        h1 {
-            font-size: 48px;
-            font-weight: 700;
-            margin: 0 0 12px 0;
-            letter-spacing: -1px;
-            font-family: 'Black Ops One', sans-serif;
-        }
+  /* ---------- PLANS ---------- */
+  .plans{
+    position:relative;
+    z-index:2;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap: clamp(16px,2vw,28px);
+    padding: 20px clamp(20px,5vw,80px) 100px;
+  }
+  .plan-card{
+    width: min(320px, 86vw);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    padding: 28px 26px;
+    backdrop-filter: blur(10px);
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .plan-card:hover{
+    transform: translateY(-6px);
+    border-color: rgba(0,204,255,0.8);
+    box-shadow: 0 10px 40px rgba(0,102,255,0.25);
+  }
+  .plan-card h3{
+    font-size: clamp(17px,1.3vw,20px);
+    color:#fff;
+    margin-bottom:12px;
+    letter-spacing:0.5px;
+    text-shadow: 0 0 12px rgba(0,153,255,0.5);
+  }
+  .plan-card p{
+    font-size: clamp(13px,1vw,14.5px);
+    color: rgba(180,205,230,0.75);
+    line-height:1.7;
+  }
 
-        .subtitle {
-            font-size: 20px;
-            color: #555;
-            margin: 0 0 32px 0;
-            line-height: 1.4;
-            font-family: 'Black Ops One', sans-serif;
-        }
+  /* ---------- FOOTER ---------- */
+  footer{
+    position:relative;
+    z-index:2;
+    display:flex;
+    justify-content:center;
+    gap: clamp(24px,4vw,60px);
+    padding: 24px 20px 40px;
+    flex-wrap:wrap;
+  }
+  .footer-link{
+    font-size: clamp(12px,0.95vw,14px);
+    color: rgba(255,255,255,0.45);
+    cursor:pointer;
+    text-decoration:none;
+    letter-spacing:1px;
+    transition: color .25s ease;
+  }
+  .footer-link:hover{ color:#fff; text-shadow: 0 0 10px rgba(0,153,255,0.7); }
 
-        .desc {
-            font-size: 16px;
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 24px;
-            max-width: 480px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+  /* ---------- MODALS ---------- */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background: rgba(0,4,10,0.72);
+    backdrop-filter: blur(8px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding: 20px;
+  }
+  .modal-overlay.active{ display:flex; }
+  .modal-box{
+    width: min(560px, 92vw);
+    max-height: 82vh;
+    overflow-y:auto;
+    background: linear-gradient(160deg, rgba(10,16,28,0.95), rgba(4,8,16,0.95));
+    border: 1px solid rgba(0,153,255,0.4);
+    border-radius: 18px;
+    padding: clamp(24px,4vw,38px);
+    box-shadow: 0 0 60px rgba(0,102,255,0.25);
+    animation: modalIn .3s ease;
+  }
+  @keyframes modalIn{
+    from{ opacity:0; transform: scale(0.92) translateY(10px); }
+    to{ opacity:1; transform: scale(1) translateY(0); }
+  }
+  .modal-box h2{
+    font-size: clamp(19px,2vw,24px);
+    color:#fff;
+    margin-bottom:16px;
+    text-shadow: 0 0 14px rgba(0,153,255,0.6);
+    letter-spacing:0.5px;
+  }
+  .modal-box p{
+    font-size: clamp(13px,1vw,14.5px);
+    color: rgba(190,212,235,0.85);
+    line-height:1.85;
+    margin-bottom: 24px;
+    white-space:pre-line;
+  }
+  .modal-actions{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+  .modal-btn{
+    padding: 11px 26px;
+    font-size: 13.5px;
+    font-weight:600;
+    letter-spacing:0.5px;
+    border-radius: 30px;
+    border:1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.8);
+    cursor:pointer;
+    transition: all .2s ease;
+  }
+  .modal-btn:hover{
+    border-color: rgba(255,255,255,0.5);
+    color:#fff;
+  }
+  .modal-btn.primary{
+    background: linear-gradient(135deg, var(--blue-1), var(--blue-2));
+    border:none;
+    color:#fff;
+    box-shadow: 0 0 18px rgba(0,153,255,0.45);
+  }
+  .modal-btn.primary:hover{
+    box-shadow: 0 0 30px rgba(0,204,255,0.8);
+  }
+  .easter-cat{
+    font-size: 90px;
+    text-align:center;
+    margin-bottom: 18px;
+    filter: drop-shadow(0 0 20px rgba(0,153,255,0.5));
+  }
 
-        .roadmap {
-            text-align: left;
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-            border: 1px solid #e9ecef;
-        }
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background: rgba(0,153,255,0.4); border-radius:4px; }
 
-        .roadmap-title {
-            font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 12px;
-            color: #1a1a1a;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .roadmap-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 8px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .roadmap-item:last-child {
-            border-bottom: none;
-        }
-
-        .roadmap-marker {
-            background: #1a1a1a;
-            color: #fff;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-
-        .roadmap-text {
-            font-size: 14px;
-            line-height: 1.5;
-            color: #333;
-        }
-
-        .roadmap-text strong {
-            color: #1a1a1a;
-        }
-
-        .download-btn {
-            display: inline-block;
-            background-color: #1a1a1a;
-            color: #ffffff;
-            padding: 16px 40px;
-            font-size: 18px;
-            font-weight: 600;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: background-color 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .download-btn:hover {
-            background-color: #333;
-        }
-
-        .badge {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #888;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .badge a {
-            color: #1a1a1a;
-            text-decoration: underline;
-        }
-
-        .badge .icon-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            color: #1a1a1a;
-            text-decoration: underline;
-        }
-
-        .badge .icon-link:hover {
-            color: #333;
-        }
-
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            font-size: 24px;
-            vertical-align: middle;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            z-index: 999;
-        }
-
-        .overlay.active {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .modal {
-            background: #ffffff;
-            width: 100%;
-            max-width: 480px;
-            max-height: 80vh;
-            padding: 32px 28px 40px;
-            border-radius: 20px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-            transform: scale(0.9);
-            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
-
-        .overlay.active .modal {
-            transform: scale(1);
-        }
-
-        .modal h2 {
-            font-size: 22px;
-            margin: 0 0 12px 0;
-        }
-
-        .modal p {
-            font-size: 15px;
-            color: #555;
-            line-height: 1.6;
-            margin: 0 0 24px 0;
-        }
-
-        .modal .donate-method {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin: 16px 0 24px 0;
-        }
-
-        .modal .donate-method .method-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            opacity: 1;
-            pointer-events: auto;
-            cursor: pointer;
-        }
-
-        .modal .donate-method .method-item .method-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .modal .donate-method .method-item .method-info .method-icon {
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #1a1a1a;
-        }
-
-        .modal .donate-method .method-item .method-info .method-name {
-            font-weight: 500;
-            color: #1a1a1a;
-        }
-
-        .modal .donate-method .method-item .method-info .method-desc {
-            font-size: 13px;
-            color: #888;
-        }
-
-        .modal .donate-method .method-item .method-action {
-            color: #1a1a1a;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-            padding: 6px 12px;
-            background: #1a1a1a;
-            color: #ffffff;
-            border-radius: 6px;
-            pointer-events: auto;
-            transition: background 0.2s ease;
-        }
-
-        .modal .donate-method .method-item .method-action:hover {
-            background: #333;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .modal-actions button {
-            flex: 1;
-            padding: 12px 0;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .btn-close {
-            background-color: #f0f0f0;
-            color: #333;
-        }
-
-        .btn-close:hover {
-            background-color: #e0e0e0;
-        }
-
-        @media (max-width: 480px) {
-            .logo {
-                width: 64px;
-                height: 64px;
-            }
-            h1 { font-size: 36px; }
-            .subtitle { font-size: 18px; }
-            .roadmap {
-                padding: 12px 16px;
-            }
-            .modal .donate-method .method-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-        }
-    </style>
+  @media (max-width: 600px){
+    .nav-right{ gap:10px; }
+    .nav-link{ display:none; }
+    .plans{ padding-bottom:70px; }
+  }
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <img src="aaa.png" alt="Logo" class="logo" id="logoTrigger">
-        <h1>MiniDialogue</h1>
-        <div class="subtitle">轻量手机端 AI</div>
-        <div class="desc">
-            基于 TinyTransformer 架构，参数量约 8598 万，模型文件 328 MB。<br>
-            需在 GPU 环境下运行，适合本地部署与推理。
-        </div>
+<canvas id="bg-canvas"></canvas>
 
-        <div class="roadmap">
-            <div class="roadmap-title">
-                <span class="material-symbols-outlined">extension</span> 最新计划
-            </div>
-            <div class="roadmap-item">
-                <div class="roadmap-marker">1</div>
-                <div class="roadmap-text">
-                    <strong>3.5亿参数模型</strong><br>
-                    在现有架构基础上进一步提升参数量至 3.5 亿，探索更复杂的语言理解与生成能力。
-                </div>
-            </div>
-            <div class="roadmap-item">
-                <div class="roadmap-marker">2</div>
-                <div class="roadmap-text">
-                    <strong>图片理解模型</strong><br>
-                    引入多模态视觉编码器，使模型具备图片识别、描述与理解能力，覆盖更多应用场景。
-                </div>
-            </div>
-            <div class="roadmap-item">
-                <div class="roadmap-marker">3</div>
-                <div class="roadmap-text">
-                    <strong>深度思考推理</strong><br>
-                    加入思维链机制，让模型在回答前进行多步推理，提升复杂逻辑问题的解决能力。
-                </div>
-            </div>
-        </div>
-        
-        <a href="#" id="downloadTrigger" class="download-btn">
-            <span class="material-symbols-outlined">hard_drive</span> 下载模型
-        </a>
-        
-        <div class="badge">
-            <span class="icon-link">
-                <span class="material-symbols-outlined">bug_report</span>
-                <a href="mailto:rzsmxkojsv@rommiui.com">提交反馈</a>
-            </span>
-            <span class="icon-link" id="donateTrigger">
-                <span class="material-symbols-outlined">paid</span>
-                赞助支持
-            </span>
-            <span class="icon-link">
-                <span class="material-symbols-outlined">storage</span>
-                <a href="https://github.com/wakcvjb/ai" target="_blank">GitHub 仓库</a>
-            </span>
-        </div>
+<div class="page">
+  <!-- NAV -->
+  <nav class="navbar">
+    <div class="brand" id="brandLogo">MD</div>
+    <div class="nav-right">
+      <a class="nav-link" data-i18n="navAbout" href="#about"></a>
+      <a class="nav-link" data-i18n="navArchitecture" href="#architecture"></a>
+      <a class="nav-link" data-i18n="navRoadmap" href="#roadmap"></a>
+      <div class="lang-switch" id="langSwitch">EN</div>
     </div>
+  </nav>
 
-    <div class="overlay" id="overlay">
-        <div class="modal">
-            <h2>使用协议</h2>
-            <p>
-                MiniDialogue 遵循 MIT 协议。<br>
-                您可自由下载、使用及修改本模型，但需保留原始版权声明。
-            </p>
-            <p>
-                本模型仅供学习和研究使用，不得用于任何非法、恶意或违反中国法律法规及国际相关准则的用途。开发者不对使用者因使用本模型所引发的任何直接或间接的法律责任负责，使用者需自行承担全部后果与风险。
-            </p>
-            <p>
-                本模型基于公开数据集训练，不包含任何商业机密或受版权保护的内容，但若因使用者自行引入数据而引发的版权纠纷，开发者不负任何责任。
-            </p>
-            <p style="font-size: 14px; color: #888; margin-top: 12px;">
-                下载服务由 <strong>Google 云端硬盘</strong> 提供。
-            </p>
-            <div class="modal-actions">
-                <button class="btn-decline" id="btnDecline">拒绝</button>
-                <button class="btn-agree" id="btnAgree">同意并下载</button>
-            </div>
-        </div>
+  <!-- HERO -->
+  <section class="hero" id="about">
+    <h1 data-i18n="siteTitle"></h1>
+    <div class="subtitle" data-i18n="siteSubtitle"></div>
+    <div class="description" data-i18n="description"></div>
+    <button class="btn-download" id="downloadBtn" data-i18n="downloadButton"></button>
+  </section>
+
+  <!-- PLANS -->
+  <section class="plans" id="roadmap">
+    <div class="plan-card">
+      <h3 data-i18n="plan1Title"></h3>
+      <p data-i18n="plan1Desc"></p>
     </div>
-
-    <div class="overlay" id="donateOverlay">
-        <div class="modal">
-            <h2>赞助支持</h2>
-            <p>感谢您对 MiniDialogue 项目的支持！您的每一份支持都是项目持续维护的动力。</p>
-            <div class="donate-method">
-                <div class="method-item">
-                    <div class="method-info">
-                        <span class="material-symbols-outlined">volunteer_activism</span>
-                        <div>
-                            <div class="method-name">爱发电</div>
-                            <div class="method-desc">通过爱发电平台支持项目</div>
-                        </div>
-                    </div>
-                    <a href="https://afdian.com/a/wakcvjb" target="_blank" class="method-action">去赞助</a>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-close" id="btnDonateClose">关闭</button>
-            </div>
-        </div>
+    <div class="plan-card">
+      <h3 data-i18n="plan2Title"></h3>
+      <p data-i18n="plan2Desc"></p>
     </div>
-
-    <div class="overlay" id="catOverlay">
-        <div class="modal" style="padding: 32px 28px 40px;">
-            <h2>一只小猫的愿望</h2>
-            <p style="margin-bottom: 16px;">
-                感谢您发现了这个隐藏入口。<br><br>
-                我是 MiniDialogue 的开发者 wakcvjb。<br>
-                这个项目完全由我一个人在空闲时间维护，它不赚钱，但让我学到了很多。<br><br>
-                如果您觉得这个项目对您有帮助，并且愿意支持我继续开发下去，<br>
-                可以考虑赞助我 5 元钱。<br><br>
-                <strong>每人赞助五元，以多积少，总有一天会够的。</strong><br><br>
-                这是我想买的那只小猫的照片。<br>
-                感谢您的阅读，也感谢您为这只小猫带来的温暖。
-            </p>
-            <img src="share_1781678238372.png" alt="小猫的照片" style="width: 100%; max-width: 320px; border-radius: 12px; margin: 8px 0 20px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            <p style="font-size: 14px; color: #999; margin-bottom: 20px;">图片来自互联网</p>
-            <div class="modal-actions">
-                <a href="https://afdian.com/a/wakcvjb" target="_blank" class="btn-agree" style="text-decoration: none; display: inline-block; padding: 12px 0; background: #1a1a1a; color: #fff; border-radius: 8px; font-weight: 600; text-align: center; flex: 1;">赞助 5 元买小猫</a>
-                <button class="btn-close" id="btnCatClose" style="flex: 1;">关闭</button>
-            </div>
-        </div>
+    <div class="plan-card">
+      <h3 data-i18n="plan3Title"></h3>
+      <p data-i18n="plan3Desc"></p>
     </div>
+  </section>
 
-    <script>
-        const overlay = document.getElementById('overlay');
-        const trigger = document.getElementById('downloadTrigger');
-        const btnAgree = document.getElementById('btnAgree');
-        const btnDecline = document.getElementById('btnDecline');
+  <!-- FOOTER -->
+  <footer id="architecture">
+    <a class="footer-link" id="feedbackLink" data-i18n="footerFeedback" href="#"></a>
+    <span class="footer-link" id="sponsorLink" data-i18n="footerSponsor"></span>
+    <a class="footer-link" id="githubLink" data-i18n="footerGitHub" href="#" target="_blank" rel="noopener"></a>
+  </footer>
+</div>
 
-        trigger.addEventListener('click', function(e) {
-            e.preventDefault();
-            overlay.classList.add('active');
-        });
+<!-- LICENSE MODAL -->
+<div class="modal-overlay" id="licenseModal">
+  <div class="modal-box">
+    <h2 data-i18n="licenseTitle"></h2>
+    <p data-i18n="licenseContent"></p>
+    <div class="modal-actions">
+      <button class="modal-btn" id="licenseDeclineBtn" data-i18n="licenseDecline"></button>
+      <button class="modal-btn primary" id="licenseAgreeBtn" data-i18n="licenseAgree"></button>
+    </div>
+  </div>
+</div>
 
-        btnAgree.addEventListener('click', function() {
-            window.location.href = 'https://drive.google.com/file/d/1oIQ03Lr8OXzrwZ1JI_gg5ZhNZ7ZccfgK/view?usp=drive_link';
-        });
+<!-- SPONSOR MODAL -->
+<div class="modal-overlay" id="sponsorModal">
+  <div class="modal-box">
+    <h2 data-i18n="sponsorTitle"></h2>
+    <p data-i18n="sponsorContent"></p>
+    <div class="modal-actions">
+      <button class="modal-btn" id="sponsorCloseBtn" data-i18n="sponsorClose"></button>
+      <button class="modal-btn primary" id="sponsorGoBtn" data-i18n="sponsorButton"></button>
+    </div>
+  </div>
+</div>
 
-        btnDecline.addEventListener('click', function() {
-            overlay.classList.remove('active');
-        });
+<!-- EASTER EGG MODAL -->
+<div class="modal-overlay" id="easterModal">
+  <div class="modal-box">
+    <div class="easter-cat">🐱</div>
+    <h2 data-i18n="easterTitle"></h2>
+    <p data-i18n="easterContent"></p>
+    <div class="modal-actions">
+      <button class="modal-btn" id="easterCloseBtn" data-i18n="easterClose"></button>
+      <button class="modal-btn primary" id="easterSponsorBtn" data-i18n="easterSponsorButton"></button>
+    </div>
+  </div>
+</div>
 
-        overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) {
-                overlay.classList.remove('active');
-            }
-        });
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* =========================================================================
+   I18N TRANSLATION DATA
+   ========================================================================= */
+const translations = {
+  en: {
+    siteTitle: "MiniDialogue",
+    siteSubtitle: "Lightweight Mobile AI",
+    description: "TinyTransformer architecture · 85.98M parameters · 328 MB model · GPU-ready for local deployment",
+    downloadButton: "Download Model",
+    navAbout: "About",
+    navArchitecture: "Architecture",
+    navRoadmap: "Roadmap",
+    footerFeedback: "Feedback",
+    footerSponsor: "Sponsor",
+    footerGitHub: "GitHub",
+    plan1Title: "350M Parameter Model",
+    plan1Desc: "Scaling up to 350M parameters for deeper language understanding",
+    plan2Title: "Image Understanding Model",
+    plan2Desc: "Multi-modal vision encoder for image recognition and captioning",
+    plan3Title: "Deep Reasoning Chain",
+    plan3Desc: "Chain-of-thought mechanism for complex reasoning tasks",
+    licenseTitle: "License Agreement",
+    licenseContent: "MiniDialogue is released under the MIT License. You are free to download, use, and modify this model, provided that the original copyright notice is retained. This model is intended for learning and research purposes only. It may not be used for any illegal, malicious, or unethical activities that violate Chinese laws, regulations, or international guidelines. The developer assumes no direct or indirect legal liability arising from the use of this model. Users bear full responsibility for any consequences or risks. This model is trained on publicly available datasets and contains no trade secrets or copyrighted content. However, the developer is not responsible for any copyright disputes arising from user-introduced data. Download service is provided via Google Drive.",
+    licenseDecline: "Decline",
+    licenseAgree: "Agree & Download",
+    sponsorTitle: "Support MiniDialogue",
+    sponsorContent: "Thank you for supporting the MiniDialogue project! Every contribution helps sustain ongoing development.",
+    sponsorAifadian: "Aifadian",
+    sponsorButton: "Sponsor Now",
+    sponsorClose: "Close",
+    easterTitle: "A Kitten's Wish",
+    easterContent: "Thank you for discovering this hidden entry. I'm wakcvjb, the developer of MiniDialogue. This project is maintained entirely by me in my free time. It doesn't make money, but it has taught me a lot. If you find this project helpful and would like to support my continued development, please consider sponsoring me 5 RMB. If everyone sponsors five yuan, little by little, one day there will be enough. This is a photo of the kitten I want to buy. Thank you for reading, and thank you for bringing warmth to this kitten. Image from the internet.",
+    easterSponsorButton: "Sponsor 5 RMB for the Kitten",
+    easterClose: "Close",
+    feedbackMailto: "mailto:contact@minidialogue.dev",
+    githubUrl: "https://github.com/wakcvjb/MiniDialogue",
+    googleDriveUrl: "https://drive.google.com/drive/folders/placeholder",
+    aifadianUrl: "https://afdian.com/a/placeholder"
+  },
+  "zh-Hans": {
+    siteTitle: "MiniDialogue",
+    siteSubtitle: "轻量手机端 AI",
+    description: "基于 TinyTransformer 架构 · 8598万参数 · 328 MB 模型 · 支持 GPU 本地部署",
+    downloadButton: "下载模型",
+    navAbout: "项目介绍",
+    navArchitecture: "技术架构",
+    navRoadmap: "开源计划",
+    footerFeedback: "提交反馈",
+    footerSponsor: "赞助支持",
+    footerGitHub: "GitHub 仓库",
+    plan1Title: "3.5亿参数模型",
+    plan1Desc: "参数量提升至3.5亿，探索更深层的语言理解与生成能力",
+    plan2Title: "图片理解模型",
+    plan2Desc: "引入多模态视觉编码器，实现图片识别、描述与理解",
+    plan3Title: "深度思考推理",
+    plan3Desc: "加入思维链机制，在回答前进行多步推理，解决复杂逻辑问题",
+    licenseTitle: "使用协议",
+    licenseContent: "MiniDialogue 遵循 MIT 协议。您可自由下载、使用及修改本模型，但需保留原始版权声明。本模型仅供学习和研究使用，不得用于任何非法、恶意或违反中国法律法规及国际相关准则的用途。开发者不对使用者因使用本模型所引发的任何直接或间接的法律责任负责，使用者需自行承担全部后果与风险。本模型基于公开数据集训练，不包含任何商业机密或受版权保护的内容，但若因使用者自行引入数据而引发的版权纠纷，开发者不负任何责任。下载服务由 Google 云端硬盘 提供。",
+    licenseDecline: "拒绝",
+    licenseAgree: "同意并下载",
+    sponsorTitle: "赞助支持",
+    sponsorContent: "感谢您对 MiniDialogue 项目的支持！您的每一份支持都是项目持续维护的动力。",
+    sponsorAifadian: "爱发电",
+    sponsorButton: "去赞助",
+    sponsorClose: "关闭",
+    easterTitle: "一只小猫的愿望",
+    easterContent: "感谢您发现了这个隐藏入口。我是 MiniDialogue 的开发者 wakcvjb。这个项目完全由我一个人在空闲时间维护，它不赚钱，但让我学到了很多。如果您觉得这个项目对您有帮助，并且愿意支持我继续开发下去，可以考虑赞助我 5 元钱。每人赞助五元，以多积少，总有一天会够的。这是我想买的那只小猫的照片。感谢您的阅读，也感谢您为这只小猫带来的温暖。图片来自互联网",
+    easterSponsorButton: "赞助 5 元买小猫",
+    easterClose: "关闭",
+    feedbackMailto: "mailto:contact@minidialogue.dev",
+    githubUrl: "https://github.com/wakcvjb/MiniDialogue",
+    googleDriveUrl: "https://drive.google.com/drive/folders/placeholder",
+    aifadianUrl: "https://afdian.com/a/placeholder"
+  },
+  "zh-Hant": {
+    siteTitle: "MiniDialogue",
+    siteSubtitle: "輕量手機端 AI",
+    description: "基於 TinyTransformer 架構 · 8598萬參數 · 328 MB 模型 · 支援 GPU 本地部署",
+    downloadButton: "下載模型",
+    navAbout: "項目介紹",
+    navArchitecture: "技術架構",
+    navRoadmap: "開源計劃",
+    footerFeedback: "提交反饋",
+    footerSponsor: "贊助支持",
+    footerGitHub: "GitHub 倉庫",
+    plan1Title: "3.5億參數模型",
+    plan1Desc: "參數量提升至3.5億，探索更深層的語言理解與生成能力",
+    plan2Title: "圖片理解模型",
+    plan2Desc: "引入多模態視覺編碼器，實現圖片識別、描述與理解",
+    plan3Title: "深度思考推理",
+    plan3Desc: "加入思維鏈機制，在回答前進行多步推理，解決複雜邏輯問題",
+    licenseTitle: "使用協議",
+    licenseContent: "MiniDialogue 遵循 MIT 協議。您可自由下載、使用及修改本模型，但需保留原始版權聲明。本模型僅供學習和研究使用，不得用於任何非法、惡意或違反中國法律法規及國際相關準則的用途。開發者不對使用者因使用本模型所引發的任何直接或間接的法律責任負責，使用者需自行承擔全部後果與風險。本模型基於公開數據集訓練，不包含任何商業機密或受版權保護的內容，但若因使用者自行引入數據而引發的版權糾紛，開發者不負任何責任。下載服務由 Google 雲端硬盤 提供。",
+    licenseDecline: "拒絕",
+    licenseAgree: "同意並下載",
+    sponsorTitle: "贊助支持",
+    sponsorContent: "感謝您對 MiniDialogue 項目的支持！您的每一份支持都是項目持續維護的動力。",
+    sponsorAifadian: "愛發電",
+    sponsorButton: "去贊助",
+    sponsorClose: "關閉",
+    easterTitle: "一隻小貓的願望",
+    easterContent: "感謝您發現了這個隱藏入口。我是 MiniDialogue 的開發者 wakcvjb。這個項目完全由我一個人在空閒時間維護，它不賺錢，但讓我學到了很多。如果您覺得這個項目對您有幫助，並且願意支持我繼續開發下去，可以考慮贊助我 5 元錢。每人贊助五元，以多積少，總有一天會夠的。這是我想買的那隻小貓的照片。感謝您的閱讀，也感謝您為這隻小貓帶來的溫暖。圖片來自互聯網",
+    easterSponsorButton: "贊助 5 元買小貓",
+    easterClose: "關閉",
+    feedbackMailto: "mailto:contact@minidialogue.dev",
+    githubUrl: "https://github.com/wakcvjb/MiniDialogue",
+    googleDriveUrl: "https://drive.google.com/drive/folders/placeholder",
+    aifadianUrl: "https://afdian.com/a/placeholder"
+  },
+  ja: {
+    siteTitle: "MiniDialogue",
+    siteSubtitle: "軽量モバイルAI",
+    description: "TinyTransformer アーキテクチャ · 8598万パラメータ · 328 MB モデル · GPU ローカルデプロイ対応",
+    downloadButton: "モデルをダウンロード",
+    navAbout: "プロジェクト紹介",
+    navArchitecture: "技術アーキテクチャ",
+    navRoadmap: "ロードマップ",
+    footerFeedback: "フィードバック",
+    footerSponsor: "スポンサー",
+    footerGitHub: "GitHub リポジトリ",
+    plan1Title: "3.5億パラメータモデル",
+    plan1Desc: "パラメータ数を3.5億に増加させ、より深い言語理解と生成能力を探求",
+    plan2Title: "画像理解モデル",
+    plan2Desc: "マルチモーダルビジョンエンコーダを導入し、画像認識・説明・理解を実現",
+    plan3Title: "深層思考推論",
+    plan3Desc: "チェーン・オブ・ソート機構を追加し、回答前に複数ステップの推論を行い複雑な論理問題を解決",
+    licenseTitle: "利用規約",
+    licenseContent: "MiniDialogue は MIT ライセンスの下でリリースされています。このモデルは自由にダウンロード、使用、変更が可能ですが、元の著作権表示を保持する必要があります。このモデルは学習および研究目的のみを意図しています。中国の法律、規制、または国際ガイドラインに違反する違法、悪意、または非倫理的な活動に使用することはできません。開発者はこのモデルの使用から生じる直接的または間接的な法的責任を負いません。ユーザーはすべての結果とリスクについて完全な責任を負います。このモデルは公開データセットでトレーニングされており、営業秘密や著作権で保護されたコンテンツは含まれていません。ただし、ユーザーが導入したデータに起因する著作権紛争について、開発者は責任を負いません。ダウンロードサービスは Google Drive 経由で提供されます。",
+    licenseDecline: "拒否",
+    licenseAgree: "同意してダウンロード",
+    sponsorTitle: "スポンサー支援",
+    sponsorContent: "MiniDialogue プロジェクトへのご支援に感謝いたします！すべてのご支援が開発継続の力となります。",
+    sponsorAifadian: "愛発電",
+    sponsorButton: "スポンサーになる",
+    sponsorClose: "閉じる",
+    easterTitle: "子猫の願い",
+    easterContent: "隠しエントリーをご発見いただきありがとうございます。私は MiniDialogue の開発者 wakcvjb です。このプロジェクトは私個人が空いた時間に完全にメンテナンスしており、収益はありませんが、多くのことを学ばせてもらいました。このプロジェクトが役に立つと思われ、開発を支援していただけるなら、5元のスポンサーをご検討ください。一人5元ずつ、少しずつ集まればいつか十分になります。これは私が買いたい子猫の写真です。お読みいただき、この子猫に温かさを届けていただきありがとうございます。画像はインターネットより。",
+    easterSponsorButton: "子猫のために5元スポンサー",
+    easterClose: "閉じる",
+    feedbackMailto: "mailto:contact@minidialogue.dev",
+    githubUrl: "https://github.com/wakcvjb/MiniDialogue",
+    googleDriveUrl: "https://drive.google.com/drive/folders/placeholder",
+    aifadianUrl: "https://afdian.com/a/placeholder"
+  },
+  ko: {
+    siteTitle: "MiniDialogue",
+    siteSubtitle: "경량 모바일 AI",
+    description: "TinyTransformer 아키텍처 · 8598만 파라미터 · 328 MB 모델 · GPU 로컬 배포 지원",
+    downloadButton: "모델 다운로드",
+    navAbout: "프로젝트 소개",
+    navArchitecture: "기술 아키텍처",
+    navRoadmap: "로드맵",
+    footerFeedback: "피드백",
+    footerSponsor: "스폰서",
+    footerGitHub: "GitHub 저장소",
+    plan1Title: "3.5억 파라미터 모델",
+    plan1Desc: "파라미터를 3.5억으로 증가시켜 더 깊은 언어 이해 및 생성 능력 탐구",
+    plan2Title: "이미지 이해 모델",
+    plan2Desc: "멀티모달 비전 인코더 도입으로 이미지 인식, 설명 및 이해 구현",
+    plan3Title: "심층 사고 추론",
+    plan3Desc: "체인 오브 소트 메커니즘 추가로 응답 전 다단계 추론 수행, 복잡한 논리 문제 해결",
+    licenseTitle: "이용 약관",
+    licenseContent: "MiniDialogue는 MIT 라이선스 하에 제공됩니다. 이 모델은 자유롭게 다운로드, 사용, 수정할 수 있지만 원본 저작권 표시는 유지해야 합니다. 이 모델은 학습 및 연구 목적으로만 사용되며, 중국 법률, 규정 또는 국제 가이드라인을 위반하는 불법, 악의적 또는 비윤리적 활동에 사용할 수 없습니다. 개발자는 이 모델 사용으로 인해 발생하는 직간접적 법적 책임을 지지 않습니다. 사용자는 모든 결과와 위험에 대해 전적인 책임을 집니다. 이 모델은 공개 데이터셋으로 훈련되었으며 영업비밀이나 저작권 보호 콘텐츠를 포함하지 않습니다. 그러나 사용자가 도입한 데이터로 인한 저작권 분쟁에 대해 개발자는 책임을 지지 않습니다. 다운로드 서비스는 Google Drive를 통해 제공됩니다.",
+    licenseDecline: "거절",
+    licenseAgree: "동의하고 다운로드",
+    sponsorTitle: "스폰서 지원",
+    sponsorContent: "MiniDialogue 프로젝트를 지원해 주셔서 감사합니다! 모든 기여는 지속적인 개발에 힘이 됩니다.",
+    sponsorAifadian: "아이파디안",
+    sponsorButton: "스폰서 하기",
+    sponsorClose: "닫기",
+    easterTitle: "고양이의 소원",
+    easterContent: "숨겨진 입구를 발견해 주셔서 감사합니다. 저는 MiniDialogue의 개발자 wakcvjb입니다. 이 프로젝트는 제가 여가 시간에 완전히 유지 관리하며, 수익은 없지만 많은 것을 배웠습니다. 이 프로젝트가 도움이 되고 제 개발을 지원하고 싶으시다면 5위안 스폰서를 고려해 주세요. 모두가 5위안씩 후원하면 조금씩 모여 언젠가는 충분해질 것입니다. 이것은 제가 사고 싶은 고양이 사진입니다. 읽어주셔서 감사하고 이 고양이에게 따뜻함을 전해주셔서 감사합니다. 이미지는 인터넷에서 가져왔습니다.",
+    easterSponsorButton: "고양이를 위해 5위안 스폰서",
+    easterClose: "닫기",
+    feedbackMailto: "mailto:contact@minidialogue.dev",
+    githubUrl: "https://github.com/wakcvjb/MiniDialogue",
+    googleDriveUrl: "https://drive.google.com/drive/folders/placeholder",
+    aifadianUrl: "https://afdian.com/a/placeholder"
+  }
+};
 
-        const donateOverlay = document.getElementById('donateOverlay');
-        const donateTrigger = document.getElementById('donateTrigger');
-        const btnDonateClose = document.getElementById('btnDonateClose');
+// Language cycle order + button labels
+const langOrder = ["en", "zh-Hans", "zh-Hant", "ja", "ko"];
+const langLabels = { en: "EN", "zh-Hans": "简", "zh-Hant": "繁", ja: "日", ko: "한" };
 
-        donateTrigger.addEventListener('click', function(e) {
-            e.preventDefault();
-            donateOverlay.classList.add('active');
-        });
+let currentLang = localStorage.getItem("md_lang") || "en";
+if (!langOrder.includes(currentLang)) currentLang = "en";
 
-        btnDonateClose.addEventListener('click', function() {
-            donateOverlay.classList.remove('active');
-        });
+function applyTranslations(){
+  const dict = translations[currentLang];
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (dict[key] !== undefined) el.textContent = dict[key];
+  });
+  document.getElementById("langSwitch").textContent = langLabels[currentLang];
+  document.getElementById("feedbackLink").href = dict.feedbackMailto;
+  document.getElementById("githubLink").href = dict.githubUrl;
+  document.title = dict.siteTitle + " — " + dict.siteSubtitle;
+}
 
-        donateOverlay.addEventListener('click', function(e) {
-            if (e.target === donateOverlay) {
-                donateOverlay.classList.remove('active');
-            }
-        });
+document.getElementById("langSwitch").addEventListener("click", () => {
+  const idx = langOrder.indexOf(currentLang);
+  currentLang = langOrder[(idx + 1) % langOrder.length];
+  localStorage.setItem("md_lang", currentLang);
+  applyTranslations();
+});
 
-        let clickCount = 0;
-        const logoTrigger = document.getElementById('logoTrigger');
-        const catOverlay = document.getElementById('catOverlay');
-        const btnCatClose = document.getElementById('btnCatClose');
+applyTranslations();
 
-        logoTrigger.addEventListener('click', function() {
-            clickCount++;
-            if (clickCount >= 7) {
-                catOverlay.classList.add('active');
-                clickCount = 0;
-            }
-        });
+/* =========================================================================
+   MODAL CONTROLS
+   ========================================================================= */
+function openModal(id){ document.getElementById(id).classList.add("active"); }
+function closeModal(id){ document.getElementById(id).classList.remove("active"); }
 
-        btnCatClose.addEventListener('click', function() {
-            catOverlay.classList.remove('active');
-        });
+document.getElementById("downloadBtn").addEventListener("click", () => openModal("licenseModal"));
+document.getElementById("licenseDeclineBtn").addEventListener("click", () => closeModal("licenseModal"));
+document.getElementById("licenseAgreeBtn").addEventListener("click", () => {
+  window.open(translations[currentLang].googleDriveUrl, "_blank");
+  closeModal("licenseModal");
+});
 
-        catOverlay.addEventListener('click', function(e) {
-            if (e.target === catOverlay) {
-                catOverlay.classList.remove('active');
-            }
-        });
-    </script>
+document.getElementById("sponsorLink").addEventListener("click", () => openModal("sponsorModal"));
+document.getElementById("sponsorCloseBtn").addEventListener("click", () => closeModal("sponsorModal"));
+document.getElementById("sponsorGoBtn").addEventListener("click", () => {
+  window.open(translations[currentLang].aifadianUrl, "_blank");
+});
 
+document.getElementById("easterCloseBtn").addEventListener("click", () => closeModal("easterModal"));
+document.getElementById("easterSponsorBtn").addEventListener("click", () => {
+  closeModal("easterModal");
+  openModal("sponsorModal");
+});
+
+// close modal by clicking backdrop
+document.querySelectorAll(".modal-overlay").forEach(overlay => {
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) overlay.classList.remove("active");
+  });
+});
+
+// Easter egg: click "MD" brand 7 times
+let brandClickCount = 0;
+let brandClickTimer = null;
+document.getElementById("brandLogo").addEventListener("click", () => {
+  brandClickCount++;
+  clearTimeout(brandClickTimer);
+  brandClickTimer = setTimeout(() => { brandClickCount = 0; }, 3000);
+  if (brandClickCount >= 7){
+    brandClickCount = 0;
+    openModal("easterModal");
+  }
+});
+
+/* =========================================================================
+   THREE.JS PARTICLE SYSTEM — BLUE "M" FORMATION
+   ========================================================================= */
+(function(){
+  const canvas = document.getElementById("bg-canvas");
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2000);
+  camera.position.set(0, 0, 260);
+
+  const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x000000, 1);
+
+  // ---- Particle count auto-scales by screen width ----
+  function getParticleCount(){
+    const w = window.innerWidth;
+    if (w <= 480) return 2200;
+    if (w <= 900) return 4500;
+    if (w <= 1440) return 7500;
+    return 10000;
+  }
+  let PARTICLE_COUNT = getParticleCount();
+
+  // ---- Canvas-generated circular gradient texture for particles ----
+  function createParticleTexture(){
+    const size = 128;
+    const cnv = document.createElement("canvas");
+    cnv.width = size; cnv.height = size;
+    const ctx = cnv.getContext("2d");
+    const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+    gradient.addColorStop(0, "rgba(255,255,255,1)");
+    gradient.addColorStop(0.2, "rgba(210,240,255,0.95)");
+    gradient.addColorStop(0.5, "rgba(0,204,255,0.55)");
+    gradient.addColorStop(1, "rgba(0,102,255,0)");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+    const tex = new THREE.CanvasTexture(cnv);
+    tex.needsUpdate = true;
+    return tex;
+  }
+  const particleTexture = createParticleTexture();
+
+  // ---- Build "M" shape target point cloud (centerline stroke sampling) ----
+  // Letter M defined via 4 centerline segments in normalized space [-1,1]
+  const mSegments = [
+    [[-1, -1], [-1, 1]],      // left vertical stroke
+    [[-1, 1], [0, -0.25]],    // diagonal down to valley
+    [[0, -0.25], [1, 1]],     // diagonal up to right peak
+    [[1, 1], [1, -1]]         // right vertical stroke
+  ];
+  // compute segment lengths for proportional sampling
+  const segLengths = mSegments.map(([a,b]) => Math.hypot(b[0]-a[0], b[1]-a[1]));
+  const totalLen = segLengths.reduce((s,l)=>s+l, 0);
+
+  const SCALE = 78;      // world-space scale of the M shape
+  const THICKNESS = 0.16; // stroke half-thickness in normalized units
+
+  function sampleMPoint(){
+    // pick a segment weighted by its length
+    let r = Math.random() * totalLen;
+    let segIdx = 0;
+    for (let i = 0; i < segLengths.length; i++){
+      if (r <= segLengths[i]){ segIdx = i; break; }
+      r -= segLengths[i];
+    }
+    const [a, b] = mSegments[segIdx];
+    const t = Math.random();
+    const px = a[0] + (b[0]-a[0]) * t;
+    const py = a[1] + (b[1]-a[1]) * t;
+    // perpendicular direction for thickness jitter
+    const dx = b[0]-a[0], dy = b[1]-a[1];
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = -dy/len, ny = dx/len;
+    const offset = (Math.random()*2 - 1) * THICKNESS;
+    const fx = (px + nx*offset) * SCALE;
+    const fy = (py + ny*offset) * SCALE;
+    const fz = (Math.random()*2 - 1) * 14; // depth jitter for volumetric feel
+    return [fx, fy, fz];
+  }
+
+  // ---- Allocate buffers ----
+  const positions = new Float32Array(PARTICLE_COUNT * 3);   // current render position
+  const startPositions = new Float32Array(PARTICLE_COUNT * 3); // scattered origin
+  const targetPositions = new Float32Array(PARTICLE_COUNT * 3); // M-shape target
+  const colors = new Float32Array(PARTICLE_COUNT * 3);
+  const sizes = new Float32Array(PARTICLE_COUNT);
+  const randomPhase = new Float32Array(PARTICLE_COUNT); // per-particle phase offset for organic feel
+
+  const colorA = new THREE.Color(0x0066ff);
+  const colorB = new THREE.Color(0x00ccff);
+
+  const SCATTER_RANGE_X = 220;
+  const SCATTER_RANGE_Y = 140;
+  const SCATTER_RANGE_Z = 160;
+
+  for (let i = 0; i < PARTICLE_COUNT; i++){
+    const i3 = i * 3;
+
+    // scattered start position
+    startPositions[i3]     = (Math.random()*2 - 1) * SCATTER_RANGE_X;
+    startPositions[i3 + 1] = (Math.random()*2 - 1) * SCATTER_RANGE_Y;
+    startPositions[i3 + 2] = (Math.random()*2 - 1) * SCATTER_RANGE_Z;
+
+    // M-shape target position
+    const [mx, my, mz] = sampleMPoint();
+    targetPositions[i3]     = mx;
+    targetPositions[i3 + 1] = my;
+    targetPositions[i3 + 2] = mz;
+
+    // initial render position = start
+    positions[i3]     = startPositions[i3];
+    positions[i3 + 1] = startPositions[i3 + 1];
+    positions[i3 + 2] = startPositions[i3 + 2];
+
+    // color: interpolate between the two blues
+    const mixT = Math.random();
+    const c = colorA.clone().lerp(colorB, mixT);
+    colors[i3] = c.r; colors[i3+1] = c.g; colors[i3+2] = c.b;
+
+    // size range 0.08 - 0.35 (scaled up for world units, refined in shader-less PointsMaterial via size attribute base)
+    sizes[i] = 0.08 + Math.random() * (0.35 - 0.08);
+
+    randomPhase[i] = Math.random() * Math.PI * 2;
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
+
+  // PointsMaterial scaled for 4K refinement; size in world units via sizeAttenuation
+  const material = new THREE.PointsMaterial({
+    size: 3.2,
+    map: particleTexture,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.9,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    sizeAttenuation: true
+  });
+
+  const particleSystem = new THREE.Points(geometry, material);
+  scene.add(particleSystem);
+
+  // Slight ambient point light feel via a soft glow sprite behind (purely additive canvas glow)
+  scene.background = null;
+
+  /* ---------- Mouse interaction state ---------- */
+  const mouse = new THREE.Vector2(0, 0);       // normalized device coords
+  const mouseWorld = new THREE.Vector3(0, 0, 0); // unprojected onto z=0 plane
+  let hoverIntensity = 0; // smoothed glow boost when mouse is near shape
+  let targetRotX = 0, targetRotY = 0;
+  let currentRotX = 0, currentRotY = 0;
+
+  window.addEventListener("mousemove", (e) => {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+    // parallax rotation targets
+    targetRotY = mouse.x * 0.18;
+    targetRotX = mouse.y * 0.12;
+
+    // unproject mouse to the z=0 plane in world space
+    const vec = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+    vec.unproject(camera);
+    const dir = vec.sub(camera.position).normalize();
+    const dist = -camera.position.z / dir.z;
+    mouseWorld.copy(camera.position).add(dir.multiplyScalar(dist));
+  });
+
+  // touch support for mobile parallax
+  window.addEventListener("touchmove", (e) => {
+    if (e.touches.length > 0){
+      const t = e.touches[0];
+      mouse.x = (t.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(t.clientY / window.innerHeight) * 2 + 1;
+      targetRotY = mouse.x * 0.18;
+      targetRotX = mouse.y * 0.12;
+    }
+  }, { passive: true });
+
+  /* ---------- Animation cycle constants ---------- */
+  const CYCLE_DURATION = 8.0;   // seconds per full aggregate/disperse loop
+  const BREATHE_PERIOD = 3.0;   // seconds per breathing pulse
+
+  const clock = new THREE.Clock();
+  const posAttr = geometry.getAttribute("position");
+  const sizeAttr = geometry.getAttribute("size");
+
+  // Smooth easing function (smootherstep)
+  function smootherstep(x){
+    x = Math.max(0, Math.min(1, x));
+    return x*x*x*(x*(x*6 - 15) + 10);
+  }
+
+  function animate(){
+    requestAnimationFrame(animate);
+    const elapsed = clock.getElapsedTime();
+
+    // ---- Cycle phase: 0 -> aggregate -> hold/breathe -> disperse -> 0 ----
+    const cycleT = (elapsed % CYCLE_DURATION) / CYCLE_DURATION; // 0..1
+    // Build an aggregation factor curve across the cycle:
+    // 0.00-0.40 aggregate (scatter -> M), 0.40-0.75 hold & breathe, 0.75-1.00 disperse (M -> scatter)
+    let aggFactor;
+    if (cycleT < 0.40){
+      aggFactor = smootherstep(cycleT / 0.40);
+    } else if (cycleT < 0.75){
+      aggFactor = 1.0;
+    } else {
+      aggFactor = smootherstep(1.0 - (cycleT - 0.75) / 0.25);
+    }
+
+    // breathing pulse (sine wave, 3s cycle) applied during the "hold" phase primarily,
+    // but kept subtle throughout for organic continuity
+    const breathe = Math.sin((elapsed / BREATHE_PERIOD) * Math.PI * 2) * 0.5 + 0.5; // 0..1
+    const breatheScale = 1.0 + breathe * 0.035 * aggFactor;
+
+    // smooth camera parallax rotation
+    currentRotX += (targetRotX - currentRotX) * 0.04;
+    currentRotY += (targetRotY - currentRotY) * 0.04;
+    particleSystem.rotation.x = currentRotX;
+    particleSystem.rotation.y = currentRotY;
+
+    // hover glow intensity smoothing: brighten when mouse is near screen center (over the M)
+    const distFromCenter = Math.hypot(mouse.x, mouse.y);
+    const nearShape = distFromCenter < 0.6 ? 1 : 0;
+    hoverIntensity += (nearShape - hoverIntensity) * 0.05;
+
+    for (let i = 0; i < PARTICLE_COUNT; i++){
+      const i3 = i * 3;
+      const phase = randomPhase[i];
+
+      // interpolate between scattered start and M-shape target
+      const sx = startPositions[i3], sy = startPositions[i3+1], sz = startPositions[i3+2];
+      const tx = targetPositions[i3], ty = targetPositions[i3+1], tz = targetPositions[i3+2];
+
+      let px = sx + (tx - sx) * aggFactor;
+      let py = sy + (ty - sy) * aggFactor;
+      let pz = sz + (tz - sz) * aggFactor;
+
+      // apply breathing scale (expand/contract around origin) once aggregated
+      px *= breatheScale;
+      py *= breatheScale;
+
+      // subtle organic drift using per-particle phase, stronger while scattered
+      const driftAmt = (1 - aggFactor) * 6.0;
+      px += Math.sin(elapsed * 0.6 + phase) * driftAmt * 0.3;
+      py += Math.cos(elapsed * 0.5 + phase) * driftAmt * 0.3;
+      pz += Math.sin(elapsed * 0.4 + phase) * driftAmt * 0.3;
+
+      // ---- mouse repulsion: particles near cursor (world-space proxy) expand outward ----
+      const dx = px - mouseWorld.x;
+      const dy = py - mouseWorld.y;
+      const distToMouse = Math.hypot(dx, dy);
+      const repelRadius = 34;
+      if (distToMouse < repelRadius && distToMouse > 0.001){
+        const force = (1 - distToMouse / repelRadius) * 18 * aggFactor;
+        px += (dx / distToMouse) * force;
+        py += (dy / distToMouse) * force;
+      }
+
+      posAttr.array[i3]     = px;
+      posAttr.array[i3 + 1] = py;
+      posAttr.array[i3 + 2] = pz;
+
+      // size pulses slightly with breathing + hover glow
+      const baseSize = sizes[i];
+      sizeAttr.array[i] = baseSize * (1 + breathe * 0.15 * aggFactor) * (1 + hoverIntensity * 0.25);
+    }
+    posAttr.needsUpdate = true;
+    sizeAttr.needsUpdate = true;
+
+    // Overall material glow boost on hover (brighter "M")
+    material.opacity = 0.82 + hoverIntensity * 0.18 + breathe * 0.05 * aggFactor;
+    material.size = 3.2 + hoverIntensity * 1.1;
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  /* ---------- Responsive resize handling ---------- */
+  window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Note: particle count is fixed after initial load to avoid geometry rebuild cost;
+    // camera distance is nudged on very small screens so the M shape remains framed.
+    if (window.innerWidth <= 480){
+      camera.position.z = 340;
+    } else if (window.innerWidth <= 900){
+      camera.position.z = 300;
+    } else {
+      camera.position.z = 260;
+    }
+  });
+
+  // initial camera framing based on starting width
+  if (window.innerWidth <= 480) camera.position.z = 340;
+  else if (window.innerWidth <= 900) camera.position.z = 300;
+})();
+</script>
 </body>
-                </html>
+</html>
